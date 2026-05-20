@@ -20,16 +20,28 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				README.md,
 			);
 			target = 46A0427E2FBDF23200A72FBA /* PlaneDetectionApp */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		46A0429B2FBDF4DB00A72FBA /* Exceptions for "PlaneDetectionApp" folder in "Compile Sources" phase from "PlaneDetectionApp" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 46A0427B2FBDF23200A72FBA /* Sources */;
+			membershipExceptions = (
+				README.md,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		46A042812FBDF23200A72FBA /* PlaneDetectionApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				46A0428D2FBDF23600A72FBA /* Exceptions for "PlaneDetectionApp" folder in "PlaneDetectionApp" target */,
+				46A0429B2FBDF4DB00A72FBA /* Exceptions for "PlaneDetectionApp" folder in "Compile Sources" phase from "PlaneDetectionApp" target */,
 			);
 			path = PlaneDetectionApp;
 			sourceTree = "<group>";

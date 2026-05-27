@@ -13,14 +13,12 @@ struct ControlsView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            // Mode toggle
             Picker("Placement Mode", selection: $appState.placementMode) {
                 Text("Image").tag(PlacementMode.image)
                 Text("Model").tag(PlacementMode.model)
             }
             .pickerStyle(.segmented)
 
-            // Photo picker button (only visible in image mode)
             if appState.placementMode == .image {
                 Button(action: {
                     appState.showPhotoPicker = true
@@ -31,7 +29,6 @@ struct ControlsView: View {
                 .buttonStyle(.borderedProminent)
             }
 
-            // Model picker button (only visible in model mode)
             if appState.placementMode == .model {
                 Button(action: {
                     appState.showModelPicker = true
@@ -42,7 +39,6 @@ struct ControlsView: View {
                 .buttonStyle(.borderedProminent)
             }
 
-            // Remove button (only visible when content is placed)
             if appState.activePlacement != nil {
                 Button(action: {
                     appState.removeActivePlacement()
@@ -54,14 +50,12 @@ struct ControlsView: View {
                 .tint(.red)
             }
 
-            // Status text or content preview
             if !appState.canPlace {
                 Text("Remove current placement to add new content")
                     .font(.caption)
                     .foregroundColor(.secondary)
             } else if appState.placementMode == .image {
                 if let selectedImage = appState.selectedImage {
-                    // Show thumbnail of selected image
                     VStack(spacing: 8) {
                         Image(uiImage: selectedImage)
                             .resizable()
@@ -80,7 +74,6 @@ struct ControlsView: View {
                 }
             } else if appState.placementMode == .model {
                 if let modelName = appState.selectedModelName {
-                    // Show model name
                     VStack(spacing: 8) {
                         Image(systemName: "cube.fill")
                             .font(.system(size: 60))
@@ -108,7 +101,6 @@ struct ControlsView: View {
         }
     }
 
-    /// Format model name for display
     private func formatModelName(_ name: String) -> String {
         name.replacingOccurrences(of: "_", with: " ")
             .capitalized

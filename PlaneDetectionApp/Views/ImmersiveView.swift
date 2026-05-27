@@ -23,7 +23,6 @@ struct ImmersiveView: View {
             RealityView { content in
                 content.add(rootEntity)
             } update: { content in
-                // Update handled in task
             }
             .task {
                 await runPlaneDetection()
@@ -93,27 +92,22 @@ struct ImmersiveView: View {
     
     private func handlePlaneUpdate(_ update: AnchorUpdate<PlaneAnchor>) {
         let planeAnchor = update.anchor
-        
-        // Only process horizontal planes
+
         guard planeAnchor.alignment == .horizontal else {
             print("Skipping non-horizontal plane: \(planeAnchor.alignment)")
             return
         }
-        
-        // Get plane's Y position in world space
+
         let transform = planeAnchor.originFromAnchorTransform
         let planeY = transform.columns.3.y
-        
+
         print("Plane Y position: \(planeY)m")
-        
-        // Filter by classification - explicitly reject ceilings
+
         if planeAnchor.surfaceClassification == .ceiling {
             print("Skipping plane classified as ceiling")
             return
         }
-        
-        // More lenient Y filter - reject planes way above (likely ceiling)
-        // Accept planes from -2m to +1m relative to device origin
+
         guard planeY >= -2.0 && planeY <= 1.0 else {
             print("Skipping plane at Y=\(planeY)m (out of acceptable range)")
             return
@@ -147,8 +141,6 @@ struct ImmersiveView: View {
         print("Entity type: \(type(of: entity))")
         print("Can place: \(appState.canPlace)")
 
-        // Check if user tapped on the placed content to remove it
-        // Check the entity itself or traverse up the parent hierarchy
         var currentEntity: Entity? = entity
         var depth = 0
         print("Checking entity hierarchy:")
@@ -158,32 +150,27 @@ struct ImmersiveView: View {
             if currentEntity?.name == "PlacedImage" || currentEntity?.name == "PlacedModel" {
                 print("✅ Found placed content at level \(depth) - removing it")
                 appState.removeActivePlacement()
-                // Show overlays after removal so user can place again
                 arViewModel.showPlaneOverlays()
                 return
             }
             currentEntity = currentEntity?.parent
             depth += 1
 
-            // Safety check to avoid infinite loop
             if depth > 10 { break }
         }
 
         print("Not a placed entity, checking if can place...")
 
-        // Check if placement is allowed
         guard appState.canPlace else {
             print("❌ Placement not allowed - existing placement must be removed first")
             return
         }
 
-        // Find the plane anchor for the tapped entity
         guard let planeAnchor = arViewModel.planeAnchor(for: entity) else {
             print("❌ Tapped entity is not a plane overlay")
             return
         }
 
-        // Get plane dimensions from the overlay entity
         guard let dimensions = arViewModel.planeDimensions(for: entity) else {
             print("❌ Failed to extract plane dimensions from overlay")
             return
@@ -191,14 +178,12 @@ struct ImmersiveView: View {
 
         print("✅ Placing content on tapped plane (dimensions: \(dimensions.width)m x \(dimensions.height)m)")
 
-        // Store plane dimensions for scaling
         appState.planeDimensions = dimensions
-        appState.currentScale = 0.75  // Reset to 75%
-        gestureStartScale = 0.75  // Reset gesture base scale
-        appState.currentRotation = .zero  // Reset rotation
-        accumulatedYRotation = .init(angle: 0, axis: [0, 1, 0])  // Reset Y rotation
+        appState.currentScale = 0.75
+        gestureStartScale = 0.75
+        appState.currentRotation = .zero
+        accumulatedYRotation = .init(angle: 0, axis: [0, 1, 0])
 
-        // Place content based on mode
         switch appState.placementMode {
         case .image:
             guard let image = appState.selectedImage else {
@@ -207,9 +192,7 @@ struct ImmersiveView: View {
             }
             print("Placing image, size: \(image.size)")
             if let imageEntity = arViewModel.placeImage(image, on: planeAnchor, planeWidth: dimensions.width, planeHeight: dimensions.height) {
-                // Store reference to the image entity (child of plane anchor)
                 appState.activePlacement = imageEntity
-                // Hide plane overlays after placement so they don't block taps
                 arViewModel.hidePlaneOverlays()
                 print("✅ Image placed and tracked")
             } else {
@@ -224,15 +207,10 @@ struct ImmersiveView: View {
             print("Placing 3D model: \(modelName)")
             Task {
                 if let modelEntity = await arViewModel.placeModel(modelName: modelName, on: planeAnchor, planeWidth: dimensions.width, planeHeight: dimensions.height) {
-                    // Store reference to the model entity (child of plane anchor)
                     appState.activePlacement = modelEntity
-                    // Store the base scale for pinch-to-zoom (this is the scale at 75%)
                     appState.modelBaseScale = modelEntity.scale
-                    // Store the base orientation for rotation (includes the X-axis flip)
                     baseOrientation = modelEntity.orientation
-                    // Reset accumulated rotation
                     accumulatedYRotation = .init(angle: 0, axis: [0, 1, 0])
-                    // Hide plane overlays after placement so they don't block taps
                     arViewModel.hidePlaneOverlays()
                     print("✅ Model placed and tracked, base scale: \(modelEntity.scale)")
                 } else {
@@ -248,39 +226,31 @@ struct ImmersiveView: View {
             return
         }
 
-        // Calculate new scale with constraints
         let magnification = Float(value.magnification)
         let newScale = gestureStartScale * magnification
 
-        // Handle different entity types with different constraints
         if let modelEntity = entity as? ModelEntity, modelEntity.name == "PlacedImage" {
-            // Images: 25% to 100% of plane
             let clampedScale = max(0.25, min(1.0, newScale))
             guard let image = appState.selectedImage else { return }
             arViewModel.updateImageScale(modelEntity, image: image, scale: clampedScale, planeWidth: dimensions.width, planeHeight: dimensions.height)
         } else if entity.name == "PlacedModel", let baseScale = appState.modelBaseScale {
-            // 3D Models: 25% to 150% of plane
             let clampedScale = max(0.25, min(1.5, newScale))
             arViewModel.updateModelScale(entity, targetScale: clampedScale, baseScale: baseScale)
         }
     }
 
     private func handleMagnifyEnded(value: EntityTargetValue<MagnifyGesture.Value>) {
-        // Only handle magnify on placed content
         guard let entity = appState.activePlacement,
               appState.planeDimensions != nil else {
             return
         }
 
-        // Calculate final scale with appropriate constraints
         let magnification = Float(value.magnification)
         let newScale = gestureStartScale * magnification
 
-        // Different max scale for images vs models
         let maxScale: Float = entity.name == "PlacedModel" ? 1.5 : 1.0
         let clampedScale = max(0.25, min(maxScale, newScale))
 
-        // Store the final scale for next gesture
         appState.currentScale = clampedScale
         gestureStartScale = clampedScale
 
@@ -288,34 +258,24 @@ struct ImmersiveView: View {
     }
 
     private func handleRotateChanged(value: EntityTargetValue<RotateGesture3D.Value>) {
-        // Only rotate 3D models, not images or plane overlays
         guard let entity = appState.activePlacement,
               entity.name == "PlacedModel" else {
             return
         }
 
-        // Get the rotation quaternion directly from the gesture
-        // This is already constrained to Y-axis
         let gestureQuat = simd_quatf(value.rotation)
-
-        // Apply rotation: gesture rotation * accumulated rotation * base orientation
-        // This order allows free rotation without angle wrapping issues
         entity.orientation = gestureQuat * accumulatedYRotation * baseOrientation
 
         print("🔄 Rotating model")
     }
 
     private func handleRotateEnded(value: EntityTargetValue<RotateGesture3D.Value>) {
-        // Store the final rotation
         guard appState.activePlacement?.name == "PlacedModel" else {
             return
         }
 
-        // Multiply the gesture rotation into our accumulated rotation
         let gestureQuat = simd_quatf(value.rotation)
         accumulatedYRotation = gestureQuat * accumulatedYRotation
-
-        // Store angle for reference (optional, mostly for debugging)
         appState.currentRotation = Angle(radians: Double(gestureQuat.angle))
 
         print("🔄 Rotation ended and saved")

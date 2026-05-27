@@ -13,13 +13,18 @@
 /* Begin PBXFileReference section */
 		46A0427F2FBDF23200A72FBA /* PlaneDetectionApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlaneDetectionApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		46A042832FBDF23200A72FBA /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
+		46A042AC2FBDFB3600A72FBA /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
+		46A042AD2FBDFB3D00A72FBA /* PlacementModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacementModeTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		46A0428D2FBDF23600A72FBA /* Exceptions for "PlaneDetectionApp" folder in "PlaneDetectionApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				CLAUDE.md,
 				Info.plist,
+				"project-specifications.md",
+				prompts.md,
 				README.md,
 			);
 			target = 46A0427E2FBDF23200A72FBA /* PlaneDetectionApp */;
@@ -66,6 +71,7 @@
 				46A042812FBDF23200A72FBA /* PlaneDetectionApp */,
 				46A042822FBDF23200A72FBA /* Packages */,
 				46A042802FBDF23200A72FBA /* Products */,
+				46A042AB2FBDFB3600A72FBA /* PlaneDetectionAppTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -83,6 +89,15 @@
 				46A042832FBDF23200A72FBA /* RealityKitContent */,
 			);
 			path = Packages;
+			sourceTree = "<group>";
+		};
+		46A042AB2FBDFB3600A72FBA /* PlaneDetectionAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				46A042AC2FBDFB3600A72FBA /* AppStateTests.swift */,
+				46A042AD2FBDFB3D00A72FBA /* PlacementModeTests.swift */,
+			);
+			path = PlaneDetectionAppTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

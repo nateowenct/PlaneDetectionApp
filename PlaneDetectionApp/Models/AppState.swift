@@ -18,7 +18,7 @@ class AppState {
     var showPhotoPicker = false
     var showModelPicker = false
 
-    let availableModels = ["tennis_court_with_mini_golf"]
+    let availableModels = ["tennis_court_with_mini_golf", "venue_terrain_textured"]
 
     var currentScale: Float = 0.75
     var planeDimensions: (width: Float, height: Float)?

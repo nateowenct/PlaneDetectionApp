@@ -115,7 +115,11 @@ class ARViewModel {
             print("📐 Original entity orientation: \(entity.orientation)")
 
             let wrapper = Entity()
-            wrapper.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
+            // Terrain mesh has Y-up already (OBJ generated that way) — no rotation needed.
+            // Other models (e.g. tennis court) are oriented vertically and need -90° X rotation.
+            if modelName != "venue_terrain_textured" {
+                wrapper.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
+            }
 
             entity.position = [0, 0, 0]
             entity.orientation = .init(angle: 0, axis: [0, 1, 0])
@@ -166,6 +170,11 @@ class ARViewModel {
             planeAnchor.addChild(modelEntity)
 
             print("✅ Model placed and scaled")
+
+            if modelName == "venue_terrain_textured" {
+                await attachPathDots(to: entity, scene: planeAnchor.scene)
+            }
+
             return modelEntity
 
         } catch {

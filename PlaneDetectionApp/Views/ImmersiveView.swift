@@ -118,7 +118,7 @@ struct ImmersiveView: View {
             print("Adding horizontal plane anchor: \(planeAnchor.id)")
             print("Plane Y position: \(planeY)m, classification: \(planeAnchor.surfaceClassification)")
             
-            let anchorEntity = AnchorEntity(planeAnchor)
+            let anchorEntity = AnchorEntity(world: planeAnchor.originFromAnchorTransform)
             rootEntity.addChild(anchorEntity)
             arViewModel.addPlaneAnchor(anchorEntity, id: planeAnchor.id, planeAnchor: planeAnchor)
             
